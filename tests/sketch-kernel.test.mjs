@@ -53,3 +53,35 @@ test("fixed constraint preserves the original line coordinates", () => {
   assert.equal(result.converged, true);
   assert.deepEqual([line.x1, line.y1, line.x2, line.y2], [1, 2, 5, 7]);
 });
+
+test("parallel constraint aligns two line directions", () => {
+  const model = createSketchModel();
+  const a = addLine(model, 0, 0, 10, 2);
+  const b = addLine(model, 0, 8, 7, 10);
+  addConstraint(model, "parallel", [a.id, b.id]);
+  const result = solveSketch(model);
+  assert.equal(result.converged, true);
+  const cross = (a.x2-a.x1)*(b.y2-b.y1) - (a.y2-a.y1)*(b.x2-b.x1);
+  assert.ok(Math.abs(cross) / (Math.hypot(a.x2-a.x1,a.y2-a.y1)*Math.hypot(b.x2-b.x1,b.y2-b.y1)) < 1e-6);
+});
+
+test("perpendicular constraint makes two line directions orthogonal", () => {
+  const model = createSketchModel();
+  const a = addLine(model, 0, 0, 10, 2);
+  const b = addLine(model, 0, 8, 7, 10);
+  addConstraint(model, "perpendicular", [a.id, b.id]);
+  const result = solveSketch(model);
+  assert.equal(result.converged, true);
+  const dot = (a.x2-a.x1)*(b.x2-b.x1) + (a.y2-a.y1)*(b.y2-b.y1);
+  assert.ok(Math.abs(dot) / (Math.hypot(a.x2-a.x1,a.y2-a.y1)*Math.hypot(b.x2-b.x1,b.y2-b.y1)) < 1e-6);
+});
+
+test("equal constraint makes two line lengths match", () => {
+  const model = createSketchModel();
+  const a = addLine(model, 0, 0, 10, 2);
+  const b = addLine(model, 0, 8, 7, 10);
+  addConstraint(model, "equal", [a.id, b.id]);
+  const result = solveSketch(model);
+  assert.equal(result.converged, true);
+  assert.ok(Math.abs(Math.hypot(a.x2-a.x1,a.y2-a.y1)-Math.hypot(b.x2-b.x1,b.y2-b.y1)) < 1e-5);
+});
