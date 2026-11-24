@@ -114,11 +114,12 @@ html,body{background:#edf0f3;color:#202a34;font-family:Arial,Helvetica,sans-seri
 <nav class="toolbar">
 <div class="group"><button id="selectTool" class="active">↖ Seleccionar</button><button id="sketchTool">✎ Croquis</button></div>
 <div class="group"><button id="extrude">Extruir</button><button id="conHorizontal">Horizontal</button><button id="conVertical">Vertical</button><button id="conFixed">Fijar</button><button id="load">Abrir</button><input id="fileInput" type="file" accept="application/json" hidden><label style="display:flex;align-items:center;gap:5px;color:#9fb3c3;font-size:11px">mm <input id="extrudeDepth" type="number" min="0.1" step="0.5" value="10" style="width:64px;background:#101922;color:white;border:1px solid #304152;border-radius:5px;padding:6px"></label><button id="delete">Eliminar</button></div>
+<div class="group"><label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#65727e">° <input id="revolveAngle" type="number" min="0.1" max="360" value="360" style="width:54px;padding:5px;border:1px solid #cbd2d9;border-radius:3px"></label></div>
 <div class="group"><button id="fit">Encuadrar</button><button id="home">Isométrica</button></div>
 <div class="group"><span class="pill" id="mode">Modo: modelado</span></div>
 </nav>
 <div class="featurebar" aria-label="Operaciones de modelado">
- <div class="feature-group"><span class="feature-caption">CREAR</span><button id="featureExtrude">▰ Extruir</button><button disabled title="Operación aún no implementada">◒ Revolución</button><button disabled title="Operación aún no implementada">⌁ Barrido</button><button disabled title="Operación aún no implementada">◇ Recubrir</button></div>
+ <div class="feature-group"><span class="feature-caption">CREAR</span><button id="featureExtrude">▰ Extruir</button><button id="featureRevolve">◒ Revolución</button><button disabled title="Operación aún no implementada">⌁ Barrido</button><button disabled title="Operación aún no implementada">◇ Recubrir</button></div>
  <div class="feature-group"><span class="feature-caption">MODIFICAR</span><button disabled title="Operación aún no implementada">⌒ Redondeo</button><button disabled title="Operación aún no implementada">／ Chaflán</button><button disabled title="Operación aún no implementada">▱ Vaciado</button><button disabled title="Operación aún no implementada">◫ Booleanas</button></div>
  <div class="feature-group"><span class="feature-caption">REFERENCIA</span><button disabled title="Operación aún no implementada">▧ Plano</button><button disabled title="Operación aún no implementada">⊙ Eje</button></div>
 </div>
@@ -126,7 +127,7 @@ html,body{background:#edf0f3;color:#202a34;font-family:Arial,Helvetica,sans-seri
 <aside class="panel left"><div class="panelhead">Árbol de características <span class="muted">⌄</span></div><div class="tree-toolbar"><input id="treeSearch" type="search" placeholder="Filtrar características…" aria-label="Filtrar características"></div><div class="treeitem selected">▣ <span>Documento</span></div><div class="treeitem indent">◇ <span>Plano superior (XY)</span></div><div id="tree"></div><div class="section"><div class="panelhead" style="padding:3px 0 8px">Historial</div><div class="treeitem">◷ <span>Origen</span></div></div></aside>
 <section class="viewport"><canvas id="view"></canvas><div class="overlay hint" id="hint">Selecciona Croquis para comenzar</div><div class="overlay viewcube" id="viewCube"><button data-view="iso">ISO</button><button data-view="top">Superior</button><button data-view="front">Frontal</button><button data-view="right">Derecha</button></div><div class="overlay coords" id="coords">X 0.00 · Y 0.00 · Z 0.00</div></section>
 <aside class="panel right"><div class="panelhead">Herramientas de croquis</div><div class="section"><label>Plano de trabajo</label><select id="plane" style="width:100%;background:#101922;color:white;border:1px solid var(--edge);padding:8px;border-radius:5px"><option value="xy">Superior (XY)</option><option value="xz">Frontal (XZ)</option><option value="yz">Lateral (YZ)</option></select></div><div class="section"><label>Geometría</label><div class="toolgrid"><button data-tool="line">╱ Línea</button><button data-tool="rect">▭ Rectángulo</button><button data-tool="centerRect">⊞ Centro-rect.</button><button data-tool="circle">◯ Círculo</button><button data-tool="ellipse">⬭ Elipse</button><button data-tool="arc">⌒ Arco semicircular</button><button data-tool="poly">⬡ Polígono</button><button data-tool="point">• Punto</button></div><div class="notice" style="margin-top:8px">Ajuste a rejilla de 0.5 mm. Línea horizontal/vertical automática. Arco semicircular por centro y radio. Restricciones H/V y fijar disponibles en la barra superior; recortar pendiente.</div></div><div class="section"><label>Restricciones paramétricas</label><div class="field"><select id="conA" aria-label="Primera línea"><option value="">Línea A</option></select><select id="conB" aria-label="Segunda línea"><option value="">Línea B</option></select></div><div class="field"><select id="pointA" aria-label="Extremo de línea A"><option value="start">Inicio A</option><option value="end">Final A</option></select><select id="pointB" aria-label="Extremo de línea B"><option value="start">Inicio B</option><option value="end">Final B</option></select></div><div class="toolgrid"><button id="conCoincident">Coincidente</button><button id="conParallel">Paralelo</button><button id="conPerpendicular">Perpendicular</button><button id="conEqual">Igual longitud</button></div><div class="field"><input id="conDistanceValue" type="number" min="0" step="0.5" value="10" aria-label="Distancia en mm"><button id="conDistance">Aplicar distancia</button></div><div class="notice">Selecciona líneas en A y B. Coincidente une los extremos elegidos; distancia fija la longitud entre los extremos de A. Horizontal, vertical y fijar usan la línea seleccionada.</div></div><div class="panelhead">Propiedades</div><div class="section" id="properties"><div class="notice">Selecciona una entidad para ver sus propiedades.</div></div></aside>
-</main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 0.9</span></footer></div>
+</main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 1.0</span></footer></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -150,6 +151,7 @@ const selectedMat=new THREE.LineBasicMaterial({color:0xe49a27});
 const solidMat=new THREE.MeshStandardMaterial({color:0x9bb8ca,metalness:.12,roughness:.42});
 let mode='select',tool='line',plane='xy',drawing=false,start=null,temp=null,selected=null;
 let sketch=createSketchModel('Croquis 1'),entities=[],features=[],history=[],redoStack=[],projectName='Proyecto sin título';
+const featureMeshes=new Map();
 const clone=v=>JSON.parse(JSON.stringify(v));
 function snap(n){return Math.round(n*2)/2}
 function toWorld(p,pl=plane){return pl==='xy'?new THREE.Vector3(p.x,p.y,0):pl==='xz'?new THREE.Vector3(p.x,0,p.y):new THREE.Vector3(0,p.x,p.y)}
@@ -183,6 +185,7 @@ function restore(s){
  sketch=clone(s.sketch);entities=s.entities.map(e=>({...clone(e),object:null}));features=clone(s.features);projectName=s.projectName||'Proyecto sin título';selected=null;
  for(const o of [...sketchGroup.children]){sketchGroup.remove(o);o.geometry?.dispose()}
  for(const o of [...solidGroup.children]){solidGroup.remove(o);o.geometry?.dispose();if(o.material!==solidMat)o.material?.dispose()}
+ featureMeshes.clear();
  entities.forEach(refreshEntityObject);features.forEach(renderFeature);refreshTree();select(null);$('.doc').textContent=projectName+' · Diseño paramétrico';
 }
 function undo(){if(!history.length)return;redoStack.push(snapshot());restore(history.pop());$('#statusText').textContent='Cambio deshecho'}
@@ -202,9 +205,9 @@ function refreshConstraintPickers(){
 }
 function refreshTree(){
  refreshConstraintPickers();
- $('#tree').innerHTML=entities.map((e,i)=>'<div class="treeitem indent" data-id="'+e.id+'">◇ <span>'+e.type+' '+(i+1)+'</span></div>').join('')+features.map((f,i)=>'<div class="treeitem indent" data-feature="'+i+'">▰ <span>Extrusión '+f.depth+' mm</span></div>').join('');
+ $('#tree').innerHTML=entities.map((e,i)=>'<div class="treeitem indent" data-id="'+e.id+'">◇ <span>'+e.type+' '+(i+1)+'</span></div>').join('')+features.map((f,i)=>'<div class="treeitem indent" data-feature="'+i+'">▰ <span>'+(f.type==='revolve'?'Revolución '+f.angle+'°':'Extrusión '+f.depth+' mm')+'</span></div>').join('');
  document.querySelectorAll('#tree [data-id]').forEach(n=>n.onclick=()=>select(entities.find(e=>e.id===n.dataset.id)));
- document.querySelectorAll('#tree [data-feature]').forEach(n=>n.onclick=()=>{$('#statusText').textContent='Feature: extrusión de '+features[+n.dataset.feature].depth+' mm'});
+ document.querySelectorAll('#tree [data-feature]').forEach(n=>n.onclick=()=>selectFeature(+n.dataset.feature));
 }
 function select(e){
  selected=e||null;
@@ -255,19 +258,41 @@ function constrain(type){
  catch(err){history.pop();alert('No se pudo aplicar: '+err.message)}
 }
 function renderFeature(f){
- const shape=new THREE.Shape();f.points.forEach((p,i)=>i?shape.lineTo(p.x,p.y):shape.moveTo(p.x,p.y));shape.closePath();
- const g=new THREE.ExtrudeGeometry(shape,{depth:f.depth,bevelEnabled:false,steps:1}),pos=g.attributes.position;
- for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);if(f.plane==='xz')pos.setXYZ(i,x,z,y);else if(f.plane==='yz')pos.setXYZ(i,z,x,y)}
- g.computeVertexNormals();const mesh=new THREE.Mesh(g,solidMat.clone());mesh.userData={type:'Extrusión',depth:f.depth};solidGroup.add(mesh);return mesh;
+ let g;
+ if(f.type==='revolve'){
+  const profile=f.points.map(p=>new THREE.Vector2(Math.max(0.05,p.x),p.y));
+  g=new THREE.LatheGeometry(profile,Math.max(24,Math.round(96*f.angle/360)),0,THREE.MathUtils.degToRad(f.angle));
+ }else{
+  const shape=new THREE.Shape();f.points.forEach((p,i)=>i?shape.lineTo(p.x,p.y):shape.moveTo(p.x,p.y));shape.closePath();
+  g=new THREE.ExtrudeGeometry(shape,{depth:f.depth,bevelEnabled:false,steps:1});
+  const pos=g.attributes.position;
+  for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);if(f.plane==='xz')pos.setXYZ(i,x,z,y);else if(f.plane==='yz')pos.setXYZ(i,z,x,y)}
+ }
+ g.computeVertexNormals();const mesh=new THREE.Mesh(g,solidMat.clone());mesh.userData={type:f.type==='revolve'?'Revolución':'Extrusión',depth:f.depth,angle:f.angle};
+ solidGroup.add(mesh);featureMeshes.set(f.id,mesh);return mesh;
+}
+function selectFeature(index){
+ const f=features[index];if(!f)return;const value=f.type==='revolve'?f.angle:f.depth;
+ $('#properties').innerHTML='<div class="field"><label>Operación</label><b>'+(f.type==='revolve'?'Revolución':'Extrusión')+'</b></div><div class="field"><label>'+(f.type==='revolve'?'Ángulo (°)':'Profundidad (mm)')+'</label><input id="featureValue" type="number" min="0.1" step="1" value="'+value+'"></div><div class="field"><button id="applyFeatureEdit">Actualizar operación</button><button id="removeFeature">Eliminar</button></div><div class="notice">La operación se regenera desde el perfil de croquis original.</div>';
+ $('#applyFeatureEdit').onclick=()=>{const v=Number($('#featureValue').value);if(!Number.isFinite(v)||v<=0||(f.type==='revolve'&&v>360)){alert('Valor inválido. El ángulo máximo es 360°.');return}saveHistory();if(f.type==='revolve')f.angle=v;else f.depth=v;const old=featureMeshes.get(f.id);if(old){solidGroup.remove(old);old.geometry.dispose();old.material.dispose();featureMeshes.delete(f.id)}renderFeature(f);refreshTree();selectFeature(index);$('#statusText').textContent='Operación regenerada'};
+ $('#removeFeature').onclick=()=>{saveHistory();const old=featureMeshes.get(f.id);if(old){solidGroup.remove(old);old.geometry.dispose();old.material.dispose();featureMeshes.delete(f.id)}features.splice(index,1);refreshTree();$('#properties').innerHTML='<div class="notice">Operación eliminada.</div>';$('#statusText').textContent='Operación eliminada'};
+ $('#statusText').textContent='Operación seleccionada';
 }
 function extrude(){
  if(!selected||!selected.closed){alert('Selecciona un perfil cerrado (rectángulo, círculo o polígono).');return}
  const depth=Math.max(.1,Number($('#extrudeDepth').value)||10);
  saveHistory();const f={id:'feature_'+crypto.randomUUID(),type:'extrude',depth,plane:selected.plane,points:clone(selected.points),sourceId:selected.id};features.push(f);renderFeature(f);refreshTree();setMode('select');$('#statusText').textContent='Extrusión creada · '+depth+' mm';
 }
+function revolve(){
+ if(!selected||!selected.closed){alert('Selecciona un perfil cerrado para revolucionar.');return}
+ if(selected.plane!=='xy'){alert('La revolución inicial usa un perfil XY y el eje Y.');return}
+ const angle=Math.min(360,Math.max(.1,Number($('#revolveAngle').value)||360));
+ if(selected.points.some(p=>p.x<0)){alert('El perfil debe quedar a la derecha del eje Y (radio positivo).');return}
+ saveHistory();const f={id:'feature_'+crypto.randomUUID(),type:'revolve',angle,plane:selected.plane,points:clone(selected.points),sourceId:selected.id};features.push(f);renderFeature(f);refreshTree();setMode('select');$('#statusText').textContent='Revolución creada · '+angle+'°';
+}
 function deleteSelected(){if(!selected)return;saveHistory();sketchGroup.remove(selected.object);entities=entities.filter(e=>e.id!==selected.id);sketch.entities=sketch.entities.filter(e=>e.id!==selected.id);sketch.constraints=sketch.constraints.filter(c=>!c.refs.some(r=>(typeof r==='string'?r:r.entityId)===selected.id));selected=null;refreshTree();select(null);$('#statusText').textContent='Entidad eliminada'}
 function saveProject(){
- const data={app:'VERTEX-CAD',version:'0.9.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
+ const data={app:'VERTEX-CAD',version:'1.0.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='vertex-cad-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#statusText').textContent='Proyecto exportado en JSON';
 }
 async function loadProject(file){
@@ -298,7 +323,7 @@ canvas.addEventListener('pointerup',e=>{
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
 $('#sketchTool').onclick=()=>setMode('sketch');$('#selectTool').onclick=()=>setMode('select');
 $('#plane').onchange=e=>{plane=e.target.value;$('#hint').textContent='Plano activo: '+plane.toUpperCase()};
-$('#extrude').onclick=extrude;$('#featureExtrude').onclick=extrude;$('#delete').onclick=deleteSelected;
+$('#extrude').onclick=extrude;$('#featureExtrude').onclick=extrude;$('#featureRevolve').onclick=revolve;$('#delete').onclick=deleteSelected;
 $('#renameDoc').onclick=()=>{const name=prompt('Nombre del documento',projectName);if(name&&name.trim()){projectName=name.trim();$('.doc').textContent=projectName+' · Diseño paramétrico';$('#statusText').textContent='Documento renombrado'}};
 $('#treeSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#tree .treeitem').forEach(n=>n.hidden=!n.textContent.toLowerCase().includes(q))};
 $('#conHorizontal').onclick=()=>constrain('horizontal');$('#conVertical').onclick=()=>constrain('vertical');$('#conFixed').onclick=()=>constrain('fixed');$('#conCoincident').onclick=applyCoincident;$('#conParallel').onclick=()=>applyMultiConstraint('parallel');$('#conPerpendicular').onclick=()=>applyMultiConstraint('perpendicular');$('#conEqual').onclick=()=>applyMultiConstraint('equal');$('#conDistance').onclick=applyDistance;
@@ -308,6 +333,6 @@ $('#fit').onclick=()=>{fit();$('#statusText').textContent='Modelo encuadrado'};$
 function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(canvas);resize();
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 0.9';
+$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 1.0';
 </script>
 </body></html>
