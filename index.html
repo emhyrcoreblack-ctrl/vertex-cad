@@ -222,7 +222,8 @@ async function loadProject(file){
  const next={sketch:data.sketch||createSketchModel(),entities:data.entities,features:data.features||[],projectName:data.projectName||file.name};
  history=[];redoStack=[];restore(next);$('#statusText').textContent='Proyecto cargado correctamente';
 }
-function setCameraView(name){const d=170;const views={iso:[1,.9,1.15],top:[0,1,0.001],front:[0,0,1],right:[1,0,0]};const v=views[name]||views.iso;camera.position.set(v[0]*d,v[1]*d,v[2]*d);controls.target.set(0,0,0);camera.up.set(0,1,0);camera.lookAt(0,0,0);controls.update();$("#statusText").textContent="Vista "+({iso:"isométrica",top:"superior",front:"frontal",right:"derecha"}[name]||"isométrica")}\nfunction fit(){setCameraView("iso")}
+function setCameraView(name){const d=170;const views={iso:[1,.9,1.15],top:[0,1,0.001],front:[0,0,1],right:[1,0,0]};const v=views[name]||views.iso;camera.position.set(v[0]*d,v[1]*d,v[2]*d);controls.target.set(0,0,0);camera.up.set(0,1,0);camera.lookAt(0,0,0);controls.update();$("#statusText").textContent="Vista "+({iso:"isométrica",top:"superior",front:"frontal",right:"derecha"}[name]||"isométrica")}
+function fit(){setCameraView("iso")}
 canvas.addEventListener('pointerdown',e=>{
  if(mode!=='sketch'){
   const r=canvas.getBoundingClientRect(),m=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),ray=new THREE.Raycaster();ray.setFromCamera(m,camera);
