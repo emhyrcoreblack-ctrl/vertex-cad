@@ -59,19 +59,71 @@ html,body{background:#edf0f3;color:#202a34;font-family:Arial,Helvetica,sans-seri
  .toolbar button{padding:6px 7px}
 }
 
+
+/* CAD document shell — structured like a professional Part Studio workspace */
+#app{grid-template-rows:44px 34px 42px minmax(0,1fr) 23px}
+.top{height:44px;gap:14px}
+.documentbar{display:flex;align-items:stretch;gap:2px;padding:0 12px;background:#f5f6f7;border-bottom:1px solid #cbd2d9}
+.document-tab{display:flex;align-items:center;gap:8px;padding:0 16px;border:0;border-radius:0;background:transparent;color:#596875;border-bottom:2px solid transparent;font-size:12px}
+.document-tab.active{background:#fff;color:#1d5f91;border-bottom-color:#2879bd;font-weight:700}
+.document-tab:disabled{opacity:.42;cursor:not-allowed}
+.documentbar .doc-actions{margin-left:auto;display:flex;align-items:center;gap:5px;color:#65727e;font-size:11px}
+.documentbar .doc-actions button{padding:4px 8px;background:#fff;border:1px solid #d2d9df;border-radius:3px;color:#40515f}
+.toolbar{min-height:42px}
+.toolbar .group:first-child{border-right:0}
+.workspace{grid-template-columns:252px minmax(0,1fr) 270px}
+.left{display:flex;flex-direction:column}
+.left .panelhead{display:flex;align-items:center;justify-content:space-between}
+.tree-toolbar{display:flex;gap:5px;padding:7px 9px;border-bottom:1px solid #e1e5e8}
+.tree-toolbar input{width:100%;min-width:0;padding:6px 8px;border:1px solid #cbd2d9;border-radius:3px;background:#fff;color:#26323d;font-size:11px}
+.featurebar{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:5px 9px;background:#fff;border-bottom:1px solid #cbd2d9}
+.featurebar .feature-group{display:flex;align-items:center;gap:3px;padding-right:8px;margin-right:3px;border-right:1px solid #d9dfe4;white-space:nowrap}
+.featurebar button{padding:6px 9px;border:1px solid transparent;border-radius:3px;background:#fff;color:#344451;font-size:11px;white-space:nowrap}
+.featurebar button:hover:not(:disabled){background:#e6f1fa;border-color:#9fc3e2;color:#155d98}
+.featurebar button:disabled{opacity:.35;cursor:not-allowed}
+.featurebar .feature-caption{font-size:10px;color:#778591;padding:0 5px}
+.viewport{background:#e9edf0}
+.viewport:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid #d5dce1}
+#view{position:relative;z-index:0}
+.viewcube{z-index:2}
+.hint,.coords{z-index:2}
+.panel.right{background:#fff}
+@media(max-width:760px){
+ #app{grid-template-rows:42px 32px 40px minmax(0,1fr) 22px}
+ .documentbar{padding:0 5px}
+ .document-tab{padding:0 9px;font-size:10px}
+ .documentbar .doc-actions{display:none}
+ .workspace{display:block}
+ .left{display:none}
+ .featurebar{padding:4px 5px}
+ .featurebar button{padding:6px 8px;font-size:10px}
+ .right{height:30vh;max-height:230px;min-height:145px}
+}
+
 </style>
 </head>
 <body>
 <div id="app">
 <header class="top"><div class="brand"><span>V</span>ÉRTEX <span>CAD</span></div><div class="doc">Proyecto sin título · Diseño paramétrico</div><div class="topright"><button id="undo">↶</button><button id="redo">↷</button><button id="save">Guardar</button></div></header>
+<div class="documentbar" role="tablist" aria-label="Pestañas del documento">
+ <button class="document-tab active" role="tab" aria-selected="true">▣ Part Studio 1</button>
+ <button class="document-tab" role="tab" aria-selected="false" disabled title="En desarrollo">▦ Ensamblaje</button>
+ <button class="document-tab" role="tab" aria-selected="false" disabled title="En desarrollo">▤ Dibujo</button>
+ <div class="doc-actions"><span>Documento</span><button id="renameDoc" type="button">Cambiar nombre</button><button id="newTab" type="button" disabled title="En desarrollo">＋</button></div>
+</div>
 <nav class="toolbar">
 <div class="group"><button id="selectTool" class="active">↖ Seleccionar</button><button id="sketchTool">✎ Croquis</button></div>
 <div class="group"><button id="extrude">Extruir</button><button id="conHorizontal">Horizontal</button><button id="conVertical">Vertical</button><button id="conFixed">Fijar</button><button id="load">Abrir</button><input id="fileInput" type="file" accept="application/json" hidden><label style="display:flex;align-items:center;gap:5px;color:#9fb3c3;font-size:11px">mm <input id="extrudeDepth" type="number" min="0.1" step="0.5" value="10" style="width:64px;background:#101922;color:white;border:1px solid #304152;border-radius:5px;padding:6px"></label><button id="delete">Eliminar</button></div>
 <div class="group"><button id="fit">Encuadrar</button><button id="home">Isométrica</button></div>
 <div class="group"><span class="pill" id="mode">Modo: modelado</span></div>
 </nav>
+<div class="featurebar" aria-label="Operaciones de modelado">
+ <div class="feature-group"><span class="feature-caption">CREAR</span><button id="featureExtrude">▰ Extruir</button><button disabled title="Operación aún no implementada">◒ Revolución</button><button disabled title="Operación aún no implementada">⌁ Barrido</button><button disabled title="Operación aún no implementada">◇ Recubrir</button></div>
+ <div class="feature-group"><span class="feature-caption">MODIFICAR</span><button disabled title="Operación aún no implementada">⌒ Redondeo</button><button disabled title="Operación aún no implementada">／ Chaflán</button><button disabled title="Operación aún no implementada">▱ Vaciado</button><button disabled title="Operación aún no implementada">◫ Booleanas</button></div>
+ <div class="feature-group"><span class="feature-caption">REFERENCIA</span><button disabled title="Operación aún no implementada">▧ Plano</button><button disabled title="Operación aún no implementada">⊙ Eje</button></div>
+</div>
 <main class="workspace">
-<aside class="panel left"><div class="panelhead">Árbol del modelo</div><div class="treeitem selected">▣ <span>Documento</span></div><div class="treeitem indent">◇ <span>Plano superior (XY)</span></div><div id="tree"></div><div class="section"><div class="panelhead" style="padding:3px 0 8px">Historial</div><div class="treeitem">◷ <span>Origen</span></div></div></aside>
+<aside class="panel left"><div class="panelhead">Árbol de características <span class="muted">⌄</span></div><div class="tree-toolbar"><input id="treeSearch" type="search" placeholder="Filtrar características…" aria-label="Filtrar características"></div><div class="treeitem selected">▣ <span>Documento</span></div><div class="treeitem indent">◇ <span>Plano superior (XY)</span></div><div id="tree"></div><div class="section"><div class="panelhead" style="padding:3px 0 8px">Historial</div><div class="treeitem">◷ <span>Origen</span></div></div></aside>
 <section class="viewport"><canvas id="view"></canvas><div class="overlay hint" id="hint">Selecciona Croquis para comenzar</div><div class="overlay viewcube" id="viewCube"><button data-view="iso">ISO</button><button data-view="top">Superior</button><button data-view="front">Frontal</button><button data-view="right">Derecha</button></div><div class="overlay coords" id="coords">X 0.00 · Y 0.00 · Z 0.00</div></section>
 <aside class="panel right"><div class="panelhead">Herramientas de croquis</div><div class="section"><label>Plano de trabajo</label><select id="plane" style="width:100%;background:#101922;color:white;border:1px solid var(--edge);padding:8px;border-radius:5px"><option value="xy">Superior (XY)</option><option value="xz">Frontal (XZ)</option><option value="yz">Lateral (YZ)</option></select></div><div class="section"><label>Geometría</label><div class="toolgrid"><button data-tool="line">╱ Línea</button><button data-tool="rect">▭ Rectángulo</button><button data-tool="centerRect">⊞ Centro-rect.</button><button data-tool="circle">◯ Círculo</button><button data-tool="ellipse">⬭ Elipse</button><button data-tool="arc">⌒ Arco semicircular</button><button data-tool="poly">⬡ Polígono</button><button data-tool="point">• Punto</button></div><div class="notice" style="margin-top:8px">Ajuste a rejilla de 0.5 mm. Línea horizontal/vertical automática. Arco semicircular por centro y radio. Restricciones H/V y fijar disponibles en la barra superior; recortar pendiente.</div></div><div class="section"><label>Restricciones paramétricas</label><div class="field"><select id="conA" aria-label="Primera línea"><option value="">Línea A</option></select><select id="conB" aria-label="Segunda línea"><option value="">Línea B</option></select></div><div class="field"><select id="pointA" aria-label="Extremo de línea A"><option value="start">Inicio A</option><option value="end">Final A</option></select><select id="pointB" aria-label="Extremo de línea B"><option value="start">Inicio B</option><option value="end">Final B</option></select></div><div class="toolgrid"><button id="conCoincident">Coincidente</button><button id="conParallel">Paralelo</button><button id="conPerpendicular">Perpendicular</button><button id="conEqual">Igual longitud</button></div><div class="field"><input id="conDistanceValue" type="number" min="0" step="0.5" value="10" aria-label="Distancia en mm"><button id="conDistance">Aplicar distancia</button></div><div class="notice">Selecciona líneas en A y B. Coincidente une los extremos elegidos; distancia fija la longitud entre los extremos de A. Horizontal, vertical y fijar usan la línea seleccionada.</div></div><div class="panelhead">Propiedades</div><div class="section" id="properties"><div class="notice">Selecciona una entidad para ver sus propiedades.</div></div></aside>
 </main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 0.8</span></footer></div>
@@ -246,7 +298,9 @@ canvas.addEventListener('pointerup',e=>{
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
 $('#sketchTool').onclick=()=>setMode('sketch');$('#selectTool').onclick=()=>setMode('select');
 $('#plane').onchange=e=>{plane=e.target.value;$('#hint').textContent='Plano activo: '+plane.toUpperCase()};
-$('#extrude').onclick=extrude;$('#delete').onclick=deleteSelected;
+$('#extrude').onclick=extrude;$('#featureExtrude').onclick=extrude;$('#delete').onclick=deleteSelected;
+$('#renameDoc').onclick=()=>{const name=prompt('Nombre del documento',projectName);if(name&&name.trim()){projectName=name.trim();$('.doc').textContent=projectName+' · Diseño paramétrico';$('#statusText').textContent='Documento renombrado'}};
+$('#treeSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#tree .treeitem').forEach(n=>n.hidden=!n.textContent.toLowerCase().includes(q))};
 $('#conHorizontal').onclick=()=>constrain('horizontal');$('#conVertical').onclick=()=>constrain('vertical');$('#conFixed').onclick=()=>constrain('fixed');$('#conCoincident').onclick=applyCoincident;$('#conParallel').onclick=()=>applyMultiConstraint('parallel');$('#conPerpendicular').onclick=()=>applyMultiConstraint('perpendicular');$('#conEqual').onclick=()=>applyMultiConstraint('equal');$('#conDistance').onclick=applyDistance;
 $('#undo').onclick=undo;$('#redo').onclick=redo;$('#save').onclick=saveProject;
 $('#load').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await loadProject(f)}catch(err){alert('No se pudo abrir el proyecto: '+err.message)}e.target.value=''};
