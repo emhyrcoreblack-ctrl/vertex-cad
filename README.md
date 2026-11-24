@@ -2,11 +2,11 @@
 
 **VÉRTEX CAD** is an independent, browser-first parametric 3D CAD project. Its workflow and feature coverage are informed by static research into Onshape, but its implementation is original.
 
-## Current test build — 0.7
+## Current test build — 0.8
 
 - Three.js 3D viewport, orbit/pan/zoom camera controls, interactive standard views (isometric, top, front, right) and XY/XZ/YZ sketch planes.
 - Updated light drafting workspace with a feature tree, tool panels, properties area and responsive mobile layout.
-- Line, corner rectangle, center rectangle, circle, semicircle arc, polygon and point tools.
+- Line, corner rectangle, center rectangle, circle, ellipse, semicircle arc, polygon and point tools. Ellipse is defined by opposite bounding-box corners and can be extruded as a closed profile.
 - 0.5 mm grid snapping and automatic horizontal/vertical line direction.
 - Initial 2D sketch kernel with horizontal, vertical, coincident, parallel, perpendicular, equal-length, distance and fixed-line constraints.
 - Toolbar actions for horizontal, vertical and fixed-line constraints.
