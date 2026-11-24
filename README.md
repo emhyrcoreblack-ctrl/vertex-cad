@@ -2,41 +2,36 @@
 
 **VÉRTEX CAD** is an independent, browser-first parametric 3D CAD project. Its workflow and feature coverage are informed by static research into Onshape, but its implementation is original.
 
-## Current repository foundation
+## Current test build — 0.4
 
-- Three.js browser prototype in `index.html`.
-- Initial sketch tools and closed-profile extrusion.
-- Onshape static-analysis inventory and evidence limitations in `docs/ONSHAPE_RESEARCH.md`.
-- Layered engineering plan in `docs/ARCHITECTURE.md`.
-- Independent 2D sketch kernel in `src/kernel/sketch-kernel.js`.
-- Automated kernel tests in `tests/sketch-kernel.test.mjs`.
+- Three.js 3D viewport, orbit/pan/zoom camera controls and XY/XZ/YZ sketch planes.
+- Line, corner rectangle, center rectangle, circle, semicircle arc, polygon and point tools.
+- 0.5 mm grid snapping and automatic horizontal/vertical line direction.
+- Initial 2D sketch kernel with horizontal, vertical, coincident, parallel, perpendicular, equal-length, distance and fixed-line constraints.
+- Toolbar actions for horizontal, vertical and fixed-line constraints.
+- Closed-profile extrusion with editable depth.
+- Entity selection/deletion, initial undo/redo, JSON export and JSON open.
+- GitHub Actions tests for the numerical kernel and browser-module JavaScript syntax.
 
-## Run the current prototype
+## Run locally
 
-Serve the repository root with a static web server:
-
-```bash
-python -m http.server 8000
-```
-
-Open `http://localhost:8000`. The current UI imports Three.js from jsDelivr, so an internet connection is required.
-
-## Run kernel tests
-
-Requires Node.js 20 or newer:
+Requires Node.js 20+ and an internet connection for Three.js CDN imports.
 
 ```bash
 npm test
+python -m http.server 8000
 ```
+
+Open `http://localhost:8000` in a browser.
+
+## Current limitations
+
+This is an early test build, not a finished professional CAD system. The numerical solver is an initial damped least-squares implementation. Coincident, parallel, perpendicular, equal-length and distance constraints are available in the kernel but are not yet exposed as toolbar controls. Constraint conflict diagnosis, redundancy handling, arc/spline constraints, robust topology, trimming, extending, splitting, offset, revolve, sweep, loft, shell, boolean operations, full feature dependency recomputation, face/edge/vertex picking, and robust history are still pending. Browser/mobile interaction has not yet been manually validated.
 
 ## Development principles
 
-- Implement CAD behavior independently; do not copy proprietary source code, assets, or branding from other products.
+- Implement CAD behavior independently; do not copy proprietary source code, assets, or branding.
 - Keep the geometry kernel independent of the viewport.
 - Separate transient inference from persistent constraints.
 - Do not label features complete until automated and browser tests pass.
 - Prioritize the web version and mobile-browser validation before Android packaging.
-
-## Status
-
-Early engineering foundation. The sketch kernel is an initial constraint-solving slice, not yet a production-grade CAD solver or finished professional CAD application.
