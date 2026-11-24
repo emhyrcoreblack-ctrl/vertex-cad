@@ -19,7 +19,7 @@
 <header class="top"><div class="brand"><span>V</span>ÉRTEX <span>CAD</span></div><div class="doc">Proyecto sin título · Diseño paramétrico</div><div class="topright"><button id="undo">↶</button><button id="redo">↷</button><button id="save">Guardar</button></div></header>
 <nav class="toolbar">
 <div class="group"><button id="selectTool" class="active">↖ Seleccionar</button><button id="sketchTool">✎ Croquis</button></div>
-<div class="group"><button id="extrude">Extruir</button><label style="display:flex;align-items:center;gap:5px;color:#9fb3c3;font-size:11px">mm <input id="extrudeDepth" type="number" min="0.1" step="0.5" value="10" style="width:64px;background:#101922;color:white;border:1px solid #304152;border-radius:5px;padding:6px"></label><button id="delete">Eliminar</button></div>
+<div class="group"><button id="extrude">Extruir</button><button id="conHorizontal">Horizontal</button><button id="conVertical">Vertical</button><button id="conFixed">Fijar</button><button id="load">Abrir</button><input id="fileInput" type="file" accept="application/json" hidden><label style="display:flex;align-items:center;gap:5px;color:#9fb3c3;font-size:11px">mm <input id="extrudeDepth" type="number" min="0.1" step="0.5" value="10" style="width:64px;background:#101922;color:white;border:1px solid #304152;border-radius:5px;padding:6px"></label><button id="delete">Eliminar</button></div>
 <div class="group"><button id="fit">Encuadrar</button><button id="home">Isométrica</button></div>
 <div class="group"><span class="pill" id="mode">Modo: modelado</span></div>
 </nav>
@@ -31,43 +31,140 @@
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-const canvas=document.querySelector('#view'),renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);renderer.setClearColor(0x101820,0);
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x101820);
-const camera=new THREE.PerspectiveCamera(45,1,.1,2000);camera.position.set(95,85,105);
-const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.08;controls.target.set(0,0,0);
-scene.add(new THREE.HemisphereLight(0xd9efff,0x263544,2));const light=new THREE.DirectionalLight(0xffffff,2.2);light.position.set(80,100,60);scene.add(light);
-const grid=new THREE.GridHelper(200,40,0x527184,0x293c4b);grid.position.y=-.03;scene.add(grid);
-const axes=new THREE.AxesHelper(35);scene.add(axes);
-const origin=new THREE.Mesh(new THREE.SphereGeometry(.7,16,12),new THREE.MeshBasicMaterial({color:0xe5b85c}));scene.add(origin);
-const root=new THREE.Group();scene.add(root);const sketchGroup=new THREE.Group();scene.add(sketchGroup);
-let mode='select',tool='line',plane='xy',drawing=false,start=null,temp=null,selected=null,entities=[],history=[],redoStack=[];
-const matLine=new THREE.LineBasicMaterial({color:0x70c9e5}),matSelected=new THREE.LineBasicMaterial({color:0xffc85b}),matSolid=new THREE.MeshStandardMaterial({color:0x69a9c4,metalness:.18,roughness:.35});
-function snap(v){return Math.round(v*2)/2}
-function toWorld(p){if(plane==='xy')return new THREE.Vector3(p.x,p.y,0);if(plane==='xz')return new THREE.Vector3(p.x,0,p.y);return new THREE.Vector3(0,p.x,p.y)}
-function fromEvent(e){const r=canvas.getBoundingClientRect(),n=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);const ray=new THREE.Raycaster();ray.setFromCamera(n,camera);const normal=plane==='xy'?new THREE.Vector3(0,0,1):plane==='xz'?new THREE.Vector3(0,1,0):new THREE.Vector3(1,0,0);const point=ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(normal,new THREE.Vector3()),new THREE.Vector3());if(!point)return null;let p=plane==='xy'?{x:point.x,y:point.y}:plane==='xz'?{x:point.x,y:point.z}:{x:point.y,y:point.z};p.x=snap(p.x);p.y=snap(p.y);return p}
-function geometryPoints(t,a,b){let dx=b.x-a.x,dy=b.y-a.y;if(t==='line'){if(Math.abs(dx)>=Math.abs(dy))dy=0;else dx=0;return [a,{x:a.x+dx,y:a.y+dy}]}if(t==='rect'||t==='centerRect'){let x1=a.x,y1=a.y,x2=b.x,y2=b.y;if(t==='centerRect'){x1=a.x-dx;y1=a.y-dy;x2=a.x+dx;y2=a.y+dy}return [{x:x1,y:y1},{x:x2,y:y1},{x:x2,y:y2},{x:x1,y:y2},{x:x1,y:y1}]}if(t==='circle'){const r=Math.hypot(dx,dy);return Array.from({length:97},(_,i)=>({x:a.x+Math.cos(i/96*Math.PI*2)*r,y:a.y+Math.sin(i/96*Math.PI*2)*r}))}if(t==='poly'){const r=Math.hypot(dx,dy);return Array.from({length:7},(_,i)=>({x:a.x+Math.cos(i/6*Math.PI*2)*r,y:a.y+Math.sin(i/6*Math.PI*2)*r}))}if(t==='arc'){const r=Math.hypot(dx,dy);return Array.from({length:49},(_,i)=>({x:a.x+Math.cos(Math.PI*i/48)*r,y:a.y+Math.sin(Math.PI*i/48)*r}))}return [a,b]}
-function makeLine(points,material=matLine){const g=new THREE.BufferGeometry().setFromPoints(points.map(p=>toWorld(p)));return new THREE.Line(g,material)}
-function addEntity(t,a,b){const pts=geometryPoints(t,a,b),obj=t==='point'?new THREE.Points(new THREE.BufferGeometry().setFromPoints([toWorld(a)]),new THREE.PointsMaterial({color:0x70c9e5,size:9,sizeAttenuation:false})):makeLine(pts);obj.userData={type:t,points:pts,plane,closed:['rect','centerRect','circle','poly'].includes(t),construction:false};sketchGroup.add(obj);entities.push(obj);history.push({type:'add',obj});redoStack=[];refreshTree();select(obj);return obj}
-function refreshTree(){document.querySelector('#tree').innerHTML=entities.map((o,i)=>'<div class="treeitem indent" data-i="'+i+'">◇ <span>'+o.userData.type+' '+(i+1)+'</span></div>').join('');document.querySelectorAll('#tree [data-i]').forEach(el=>el.onclick=()=>select(entities[+el.dataset.i]))}
-function select(o){if(selected&&selected.material===matSelected)selected.material=matLine;selected=o;if(o){o.material=matSelected;const d=o.userData;document.querySelector('#properties').innerHTML='<div class="field"><label>Tipo</label><b>'+d.type+'</b></div><div class="field"><label>Puntos</label><b>'+d.points.length+'</b></div><div class="notice">Geometría en plano '+d.plane.toUpperCase()+'</div>'}else document.querySelector('#properties').innerHTML='<div class="notice">Selecciona una entidad para ver sus propiedades.</div>';document.querySelectorAll('#tree [data-i]').forEach(el=>el.classList.toggle('selected',entities[+el.dataset.i]===o))}
-function setMode(m){mode=m;document.querySelector('#mode').textContent='Modo: '+(m==='sketch'?'croquis':'modelado');document.querySelector('#hint').textContent=m==='sketch'?'Croquis activo · elige una herramienta y dibuja':'Selecciona Croquis para comenzar';document.querySelector('#sketchTool').classList.toggle('active',m==='sketch');document.querySelector('#selectTool').classList.toggle('active',m==='select');controls.enabled=m!=='sketch'}
-function setTool(t){tool=t;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));document.querySelector('#hint').textContent='Herramienta: '+t+' · toca y arrastra para crear'}
-function finishSketch(){drawing=false;if(temp){sketchGroup.remove(temp);temp=null}if(start)start=null}
-canvas.addEventListener('pointerdown',e=>{if(mode!=='sketch'){const r=canvas.getBoundingClientRect(),m=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),ray=new THREE.Raycaster();ray.setFromCamera(m,camera);const hit=ray.intersectObjects(sketchGroup.children,false)[0];select(hit?hit.object:null);return}const p=fromEvent(e);if(!p)return;if(tool==='point'){addEntity('point',p,p);document.querySelector('#statusText').textContent='Punto creado';return}drawing=true;start=p;temp=makeLine([p,p]);sketchGroup.add(temp);canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{const p=fromEvent(e);if(p)document.querySelector('#coords').textContent='X '+p.x.toFixed(2)+' · Y '+p.y.toFixed(2)+' · Z 0.00';if(!drawing||!p)return;const pts=geometryPoints(tool,start,p);temp.geometry.dispose();temp.geometry=new THREE.BufferGeometry().setFromPoints(pts.map(q=>toWorld(q)))});
-canvas.addEventListener('pointerup',e=>{if(!drawing||!start)return;const p=fromEvent(e);if(p&&(tool==='point'||Math.hypot(p.x-start.x,p.y-start.y)>.25))addEntity(tool,start,p);finishSketch()});
+import {createSketchModel,addLine,addConstraint,solveSketch} from './src/kernel/sketch-kernel.js';
+
+const $=s=>document.querySelector(s);
+const canvas=$('#view');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x101820);
+const camera=new THREE.PerspectiveCamera(45,1,.1,3000); camera.position.set(100,90,115);
+const controls=new OrbitControls(camera,canvas); controls.enableDamping=true; controls.target.set(0,0,0);
+scene.add(new THREE.HemisphereLight(0xd9efff,0x263544,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.1); sun.position.set(80,100,60); scene.add(sun);
+const grid=new THREE.GridHelper(240,48,0x527184,0x293c4b); grid.position.y=-.04; scene.add(grid);
+scene.add(new THREE.AxesHelper(35));
+const origin=new THREE.Mesh(new THREE.SphereGeometry(.7,16,12),new THREE.MeshBasicMaterial({color:0xe5b85c})); scene.add(origin);
+const sketchGroup=new THREE.Group(),solidGroup=new THREE.Group(); scene.add(sketchGroup,solidGroup);
+const lineMat=new THREE.LineBasicMaterial({color:0x70c9e5});
+const selectedMat=new THREE.LineBasicMaterial({color:0xffc85b});
+const solidMat=new THREE.MeshStandardMaterial({color:0x69a9c4,metalness:.15,roughness:.38});
+let mode='select',tool='line',plane='xy',drawing=false,start=null,temp=null,selected=null;
+let sketch=createSketchModel('Croquis 1'),entities=[],features=[],history=[],redoStack=[],projectName='Proyecto sin título';
+const clone=v=>JSON.parse(JSON.stringify(v));
+function snap(n){return Math.round(n*2)/2}
+function toWorld(p,pl=plane){return pl==='xy'?new THREE.Vector3(p.x,p.y,0):pl==='xz'?new THREE.Vector3(p.x,0,p.y):new THREE.Vector3(0,p.x,p.y)}
+function fromEvent(e){
+ const r=canvas.getBoundingClientRect(),n=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+ const ray=new THREE.Raycaster();ray.setFromCamera(n,camera);
+ const normal=plane==='xy'?new THREE.Vector3(0,0,1):plane==='xz'?new THREE.Vector3(0,1,0):new THREE.Vector3(1,0,0);
+ const p=ray.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(normal,new THREE.Vector3()),new THREE.Vector3());
+ if(!p)return null;
+ const q=plane==='xy'?{x:p.x,y:p.y}:plane==='xz'?{x:p.x,y:p.z}:{x:p.y,y:p.z};
+ q.x=snap(q.x);q.y=snap(q.y);return q;
+}
+function pointsFor(t,a,b){
+ const dx=b.x-a.x,dy=b.y-a.y;
+ if(t==='line'){let x=dx,y=dy;if(Math.abs(dx)>=Math.abs(dy))y=0;else x=0;return [a,{x:a.x+x,y:a.y+y}]}
+ if(t==='rect'||t==='centerRect'){let x1=a.x,y1=a.y,x2=b.x,y2=b.y;if(t==='centerRect'){x1=a.x-dx;y1=a.y-dy;x2=a.x+dx;y2=a.y+dy}return [{x:x1,y:y1},{x:x2,y:y1},{x:x2,y:y2},{x:x1,y:y2},{x:x1,y:y1}]}
+ if(t==='circle'){const r=Math.hypot(dx,dy);return Array.from({length:97},(_,i)=>({x:a.x+Math.cos(i/96*Math.PI*2)*r,y:a.y+Math.sin(i/96*Math.PI*2)*r}))}
+ if(t==='poly'){const r=Math.hypot(dx,dy);return Array.from({length:7},(_,i)=>({x:a.x+Math.cos(i/6*Math.PI*2)*r,y:a.y+Math.sin(i/6*Math.PI*2)*r}))}
+ if(t==='arc'){const r=Math.hypot(dx,dy);return Array.from({length:49},(_,i)=>({x:a.x+Math.cos(Math.PI*i/48)*r,y:a.y+Math.sin(Math.PI*i/48)*r}))}
+ return [a,b];
+}
+function objectFor(e,highlight=false){
+ if(e.type==='point')return new THREE.Points(new THREE.BufferGeometry().setFromPoints([toWorld(e.points[0],e.plane)]),new THREE.PointsMaterial({color:highlight?0xffc85b:0x70c9e5,size:9,sizeAttenuation:false}));
+ return new THREE.Line(new THREE.BufferGeometry().setFromPoints(e.points.map(p=>toWorld(p,e.plane))),highlight?selectedMat:lineMat);
+}
+function refreshEntityObject(e){if(e.object){sketchGroup.remove(e.object);e.object.geometry.dispose()}e.object=objectFor(e,e.id===selected?.id);e.object.userData.entityId=e.id;sketchGroup.add(e.object)}
+function snapshot(){return {sketch:clone(sketch),entities:entities.map(e=>({id:e.id,type:e.type,points:clone(e.points),plane:e.plane,closed:e.closed})),features:clone(features),projectName}}
+function saveHistory(){history.push(snapshot());if(history.length>80)history.shift();redoStack=[]}
+function restore(s){
+ sketch=clone(s.sketch);entities=s.entities.map(e=>({...clone(e),object:null}));features=clone(s.features);projectName=s.projectName||'Proyecto sin título';selected=null;
+ for(const o of [...sketchGroup.children]){sketchGroup.remove(o);o.geometry?.dispose()}
+ for(const o of [...solidGroup.children]){solidGroup.remove(o);o.geometry?.dispose();if(o.material!==solidMat)o.material?.dispose()}
+ entities.forEach(refreshEntityObject);features.forEach(renderFeature);refreshTree();select(null);$('.doc').textContent=projectName+' · Diseño paramétrico';
+}
+function undo(){if(!history.length)return;redoStack.push(snapshot());restore(history.pop());$('#statusText').textContent='Cambio deshecho'}
+function redo(){if(!redoStack.length)return;history.push(snapshot());restore(redoStack.pop());$('#statusText').textContent='Cambio restaurado'}
+function addEntity(type,a,b){
+ const pts=pointsFor(type,a,b),id=type==='line'?addLine(sketch,a.x,a.y,pts[1].x,pts[1].y).id:'geo_'+crypto.randomUUID();
+ const e={id,type,points:pts.map(p=>({...p})),plane,closed:['rect','centerRect','circle','poly'].includes(type)};
+ entities.push(e);refreshEntityObject(e);refreshTree();select(e);return e;
+}
+function refreshTree(){
+ $('#tree').innerHTML=entities.map((e,i)=>'<div class="treeitem indent" data-id="'+e.id+'">◇ <span>'+e.type+' '+(i+1)+'</span></div>').join('')+features.map((f,i)=>'<div class="treeitem indent" data-feature="'+i+'">▰ <span>Extrusión '+f.depth+' mm</span></div>').join('');
+ document.querySelectorAll('#tree [data-id]').forEach(n=>n.onclick=()=>select(entities.find(e=>e.id===n.dataset.id)));
+ document.querySelectorAll('#tree [data-feature]').forEach(n=>n.onclick=()=>{$('#statusText').textContent='Feature: extrusión de '+features[+n.dataset.feature].depth+' mm'});
+}
+function select(e){
+ selected=e||null;
+ entities.forEach(x=>{if(x.object){x.object.material=x===selected?selectedMat:lineMat;if(x.type==='point')x.object.material.color.set(x===selected?0xffc85b:0x70c9e5)}});
+ document.querySelectorAll('#tree [data-id]').forEach(n=>n.classList.toggle('selected',n.dataset.id===selected?.id));
+ $('#properties').innerHTML=selected?'<div class="field"><label>Tipo</label><b>'+selected.type+'</b></div><div class="field"><label>Vértices</label><b>'+selected.points.length+'</b></div><div class="notice">Plano '+selected.plane.toUpperCase()+' · unidades mm</div><div class="notice">Restricciones: '+sketch.constraints.filter(c=>c.refs.includes(selected.id)).length+'</div>':'<div class="notice">Selecciona una entidad para ver sus propiedades.</div>';
+}
+function setMode(m){mode=m;$('#mode').textContent='Modo: '+(m==='sketch'?'croquis':'modelado');$('#hint').textContent=m==='sketch'?'Croquis activo · elige herramienta y arrastra':'Selecciona Croquis para comenzar';$('#sketchTool').classList.toggle('active',m==='sketch');$('#selectTool').classList.toggle('active',m==='select');controls.enabled=m!=='sketch'}
+function setTool(t){tool=t;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));$('#hint').textContent='Herramienta: '+t+' · toca y arrastra'}
+function syncSolvedLines(){
+ for(const e of entities){if(e.type==='line'){const k=sketch.entities.find(x=>x.id===e.id);if(k)e.points=[{x:k.x1,y:k.y1},{x:k.x2,y:k.y2}];refreshEntityObject(e)}}
+}
+function constrain(type){
+ if(!selected||selected.type!=='line'){alert('Selecciona primero una línea del croquis.');return}
+ saveHistory();
+ try{addConstraint(sketch,type,[selected.id]);const result=solveSketch(sketch);syncSolvedLines();select(selected);$('#statusText').textContent=(result.converged?'Restricción resuelta':'Restricción añadida · residual '+result.maxResidual.toExponential(2))+' · GDL '+result.dof}
+ catch(err){history.pop();alert('No se pudo aplicar: '+err.message)}
+}
+function renderFeature(f){
+ const shape=new THREE.Shape();f.points.forEach((p,i)=>i?shape.lineTo(p.x,p.y):shape.moveTo(p.x,p.y));shape.closePath();
+ const g=new THREE.ExtrudeGeometry(shape,{depth:f.depth,bevelEnabled:false,steps:1}),pos=g.attributes.position;
+ for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);if(f.plane==='xz')pos.setXYZ(i,x,z,y);else if(f.plane==='yz')pos.setXYZ(i,z,x,y)}
+ g.computeVertexNormals();const mesh=new THREE.Mesh(g,solidMat.clone());mesh.userData={type:'Extrusión',depth:f.depth};solidGroup.add(mesh);return mesh;
+}
+function extrude(){
+ if(!selected||!selected.closed){alert('Selecciona un perfil cerrado (rectángulo, círculo o polígono).');return}
+ const depth=Math.max(.1,Number($('#extrudeDepth').value)||10);
+ saveHistory();const f={id:'feature_'+crypto.randomUUID(),type:'extrude',depth,plane:selected.plane,points:clone(selected.points),sourceId:selected.id};features.push(f);renderFeature(f);refreshTree();setMode('select');$('#statusText').textContent='Extrusión creada · '+depth+' mm';
+}
+function deleteSelected(){if(!selected)return;saveHistory();sketchGroup.remove(selected.object);entities=entities.filter(e=>e.id!==selected.id);sketch.entities=sketch.entities.filter(e=>e.id!==selected.id);sketch.constraints=sketch.constraints.filter(c=>!c.refs.some(r=>(typeof r==='string'?r:r.entityId)===selected.id));selected=null;refreshTree();select(null);$('#statusText').textContent='Entidad eliminada'}
+function saveProject(){
+ const data={app:'VERTEX-CAD',version:'0.4.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='vertex-cad-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#statusText').textContent='Proyecto exportado en JSON';
+}
+async function loadProject(file){
+ const data=JSON.parse(await file.text());if(data.app!=='VERTEX-CAD'||!Array.isArray(data.entities))throw new Error('El archivo no es un proyecto VÉRTEX CAD válido.');
+ const next={sketch:data.sketch||createSketchModel(),entities:data.entities,features:data.features||[],projectName:data.projectName||file.name};
+ history=[];redoStack=[];restore(next);$('#statusText').textContent='Proyecto cargado correctamente';
+}
+function fit(){controls.target.set(0,0,0);camera.position.set(100,90,115);controls.update()}
+canvas.addEventListener('pointerdown',e=>{
+ if(mode!=='sketch'){
+  const r=canvas.getBoundingClientRect(),m=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),ray=new THREE.Raycaster();ray.setFromCamera(m,camera);
+  const hits=ray.intersectObjects(sketchGroup.children,false);select(hits.length?entities.find(x=>x.id===hits[0].object.userData.entityId):null);return
+ }
+ const p=fromEvent(e);if(!p)return;
+ if(tool==='point'){saveHistory();addEntity('point',p,p);$('#statusText').textContent='Punto creado';return}
+ drawing=true;start=p;temp=new THREE.Line(new THREE.BufferGeometry().setFromPoints([toWorld(p)]),lineMat);sketchGroup.add(temp);canvas.setPointerCapture(e.pointerId)
+});
+canvas.addEventListener('pointermove',e=>{
+ const p=fromEvent(e);if(p)$('#coords').textContent='X '+p.x.toFixed(2)+' · Y '+p.y.toFixed(2)+' · Z 0.00';
+ if(!drawing||!p||!temp)return;const pts=pointsFor(tool,start,p);temp.geometry.dispose();temp.geometry=new THREE.BufferGeometry().setFromPoints(pts.map(q=>toWorld(q)));
+});
+canvas.addEventListener('pointerup',e=>{
+ if(!drawing||!start)return;const p=fromEvent(e);if(temp){sketchGroup.remove(temp);temp.geometry.dispose();temp=null}
+ if(p&&Math.hypot(p.x-start.x,p.y-start.y)>.2){saveHistory();addEntity(tool,start,p);$('#statusText').textContent=tool+' creado'}
+ drawing=false;start=null;
+});
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
-document.querySelector('#sketchTool').onclick=()=>setMode('sketch');document.querySelector('#selectTool').onclick=()=>setMode('select');
-document.querySelector('#plane').onchange=e=>{plane=e.target.value;document.querySelector('#hint').textContent='Plano activo: '+plane.toUpperCase()};
-document.querySelector('#delete').onclick=()=>{if(!selected)return;sketchGroup.remove(selected);entities=entities.filter(o=>o!==selected);selected=null;refreshTree();select(null)};
-document.querySelector('#extrude').onclick=()=>{if(!selected){alert('Selecciona un perfil cerrado antes de extruir.');return}const d=selected.userData;if(!d.closed){alert('La entidad seleccionada no es un perfil cerrado.');return}const shape=new THREE.Shape();d.points.forEach((p,i)=>{if(i===0)shape.moveTo(p.x,p.y);else shape.lineTo(p.x,p.y)});shape.closePath();const depth=Math.max(.1,Number(document.querySelector('#extrudeDepth').value)||10),geom=new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,steps:1});const pos=geom.attributes.position;for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);if(d.plane==='xy')pos.setXYZ(i,x,y,z);else if(d.plane==='xz')pos.setXYZ(i,x,z,y);else pos.setXYZ(i,z,x,y)}geom.computeVertexNormals();const mesh=new THREE.Mesh(geom,matSolid.clone());mesh.userData={type:'Extrusión',depth,plane:d.plane,sourceType:d.type};root.add(mesh);history.push({type:'solid',obj:mesh});redoStack=[];document.querySelector('#tree').insertAdjacentHTML('beforeend','<div class="treeitem indent">▰ <span>Extrusión '+depth+' mm · '+d.plane.toUpperCase()+'</span></div>');setMode('select');document.querySelector('#statusText').textContent='Extrusión de '+depth+' mm creada'};
-document.querySelector('#fit').onclick=()=>{controls.target.set(0,0,0);camera.position.set(95,85,105);controls.update()};document.querySelector('#home').onclick=()=>{camera.position.set(95,85,105);controls.target.set(0,0,0);controls.update()};
-document.querySelector('#undo').onclick=()=>{const h=history.pop();if(!h)return;if(h.type==='add'){sketchGroup.remove(h.obj);entities=entities.filter(o=>o!==h.obj);redoStack.push(h.obj);refreshTree();select(null)}else if(h.type==='solid'){root.remove(h.obj);redoStack.push(h.obj);document.querySelector('#statusText').textContent='Extrusión deshecha'}};
-document.querySelector('#redo').onclick=()=>{const o=redoStack.pop();if(o){if(o.userData.type==='Extrusión'){root.add(o);history.push({type:'solid',obj:o})}else{sketchGroup.add(o);entities.push(o);history.push({type:'add',obj:o});refreshTree()}}};
-document.querySelector('#save').onclick=()=>{const data={app:'VERTEX-CAD',version:'0.3.0',entities:entities.map(o=>o.userData),features:root.children.map(o=>o.userData)};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vertex-cad-project.json';a.click();URL.revokeObjectURL(a.href)};
-function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(canvas);resize();
+$('#sketchTool').onclick=()=>setMode('sketch');$('#selectTool').onclick=()=>setMode('select');
+$('#plane').onchange=e=>{plane=e.target.value;$('#hint').textContent='Plano activo: '+plane.toUpperCase()};
+$('#extrude').onclick=extrude;$('#delete').onclick=deleteSelected;
+$('#conHorizontal').onclick=()=>constrain('horizontal');$('#conVertical').onclick=()=>constrain('vertical');$('#conFixed').onclick=()=>constrain('fixed');
+$('#undo').onclick=undo;$('#redo').onclick=redo;$('#save').onclick=saveProject;
+$('#load').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await loadProject(f)}catch(err){alert('No se pudo abrir el proyecto: '+err.message)}e.target.value=''};
+$('#fit').onclick=fit;$('#home').onclick=fit;
+function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(canvas);resize();
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-document.querySelector('#statusText').textContent='Motor 3D iniciado · unidades de trabajo: mm';
+$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 0.4';
 </script>
 </body></html>
