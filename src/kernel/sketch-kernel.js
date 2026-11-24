@@ -44,7 +44,7 @@ export function addCircle(model, cx, cy, radius, options = {}) {
 export function addConstraint(model, type, refs, value = null, options = {}) {
   const allowed = new Set([
     "horizontal", "vertical", "coincident", "parallel",
-    "perpendicular", "equal", "distance", "fixed"
+    "perpendicular", "equal", "distance", "radius", "concentric", "fixed"
   ]);
   if (!allowed.has(type)) throw new TypeError(`Unsupported constraint: ${type}`);
   const constraint = {
@@ -57,8 +57,14 @@ export function addConstraint(model, type, refs, value = null, options = {}) {
   };
   validateConstraintRefs(model, constraint);
   if (type === "fixed") {
-    const line = getLine(model, refs[0]);
-    constraint.target = { x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2 };
+    const entity = getLine(model, refs[0]);
+    constraint.target = { x1: entity.x1, y1: entity.y1, x2: entity.x2, y2: entity.y2 };
+  }
+  if (type === "radius" && (!Number.isFinite(constraint.value) || constraint.value <= 0)) {
+    throw new RangeError("Radius constraint requires a positive value.");
+  }
+  if (type === "radius" && getCircle(model, refs[0]).r <= 0) {
+    throw new RangeError("Circle radius must be positive.");
   }
   if (type === "distance" && (!Number.isFinite(constraint.value) || constraint.value < 0)) {
     throw new RangeError("Distance constraint requires a non-negative value.");
@@ -174,6 +180,11 @@ function residualVector(model, variables, values) {
     } else if (c.type === "distance") {
       const a = pointOnLine(model, c.refs[0]), b = pointOnLine(model, c.refs[1]);
       push(Math.hypot(a.x - b.x, a.y - b.y) - c.value);
+    } else if (c.type === "radius") {
+      push(getCircle(model, c.refs[0]).r - c.value);
+    } else if (c.type === "concentric") {
+      const a = getCircle(model, c.refs[0]), b = getCircle(model, c.refs[1]);
+      push(a.cx - b.cx); push(a.cy - b.cy);
     } else if (c.type === "fixed") {
       const l = getLine(model, c.refs[0]);
       push(l.x1 - c.target.x1); push(l.y1 - c.target.y1);
@@ -244,9 +255,11 @@ function solveLinearSystem(A, b) {
 }
 
 function validateConstraintRefs(model, c) {
-  const expected = c.type === "coincident" || c.type === "distance" ? 2 : c.type === "parallel" || c.type === "perpendicular" || c.type === "equal" ? 2 : 1;
+  const expected = c.type === "coincident" || c.type === "distance" || c.type === "concentric" || c.type === "parallel" || c.type === "perpendicular" || c.type === "equal" ? 2 : 1;
   if (!Array.isArray(c.refs) || c.refs.length !== expected) throw new TypeError(`${c.type} expects ${expected} reference(s).`);
   if (["horizontal", "vertical", "fixed"].includes(c.type)) getLine(model, c.refs[0]);
+  if (c.type === "radius") getCircle(model, c.refs[0]);
+  if (c.type === "concentric") c.refs.forEach(id => getCircle(model, id));
   if (["parallel", "perpendicular", "equal"].includes(c.type)) c.refs.forEach(id => getLine(model, id));
   if (["coincident", "distance"].includes(c.type)) c.refs.forEach(ref => pointOnLine(model, ref));
 }
@@ -254,6 +267,11 @@ function validateConstraintRefs(model, c) {
 function getLine(model, id) {
   const e = model.entities.find(item => item.id === (typeof id === "string" ? id : id.entityId));
   if (!e || e.type !== "line") throw new TypeError(`Line not found: ${typeof id === "string" ? id : id.entityId}`);
+  return e;
+}
+function getCircle(model, id) {
+  const e = model.entities.find(item => item.id === (typeof id === "string" ? id : id.entityId));
+  if (!e || e.type !== "circle") throw new TypeError(`Circle not found: ${typeof id === "string" ? id : id.entityId}`);
   return e;
 }
 function pointOnLine(model, ref) {
