@@ -2,13 +2,14 @@
 
 **VÉRTEX CAD** is an independent, browser-first parametric 3D CAD project. Its workflow and feature coverage are informed by static research into Onshape, but its implementation is original.
 
-## Current test build — 0.4
+## Current test build — 0.5
 
 - Three.js 3D viewport, orbit/pan/zoom camera controls and XY/XZ/YZ sketch planes.
 - Line, corner rectangle, center rectangle, circle, semicircle arc, polygon and point tools.
 - 0.5 mm grid snapping and automatic horizontal/vertical line direction.
 - Initial 2D sketch kernel with horizontal, vertical, coincident, parallel, perpendicular, equal-length, distance and fixed-line constraints.
 - Toolbar actions for horizontal, vertical and fixed-line constraints.
+- UI controls for coincident endpoints, parallel lines, perpendicular lines, equal line lengths and numeric line distance. Two-line constraints use explicit A/B selectors; endpoint coincidence lets you choose each endpoint.
 - Closed-profile extrusion with editable depth.
 - Entity selection/deletion, initial undo/redo, JSON export and JSON open.
 - GitHub Actions tests for the numerical kernel and browser-module JavaScript syntax.
@@ -26,7 +27,7 @@ Open `http://localhost:8000` in a browser.
 
 ## Current limitations
 
-This is an early test build, not a finished professional CAD system. The numerical solver is an initial damped least-squares implementation. Coincident, parallel, perpendicular, equal-length and distance constraints are available in the kernel but are not yet exposed as toolbar controls. Constraint conflict diagnosis, redundancy handling, arc/spline constraints, robust topology, trimming, extending, splitting, offset, revolve, sweep, loft, shell, boolean operations, full feature dependency recomputation, face/edge/vertex picking, and robust history are still pending. Browser/mobile interaction has not yet been manually validated.
+This is an early test build, not a finished professional CAD system. The numerical solver is an initial damped least-squares implementation. The solver remains an initial damped least-squares implementation; conflict diagnosis and redundancy handling are not yet available. Constraint tools are now exposed in the UI, but still require manual browser/mobile validation. Constraint conflict diagnosis, redundancy handling, arc/spline constraints, robust topology, trimming, extending, splitting, offset, revolve, sweep, loft, shell, boolean operations, full feature dependency recomputation, face/edge/vertex picking, and robust history are still pending. Browser/mobile interaction has not yet been manually validated.
 
 ## Development principles
 
