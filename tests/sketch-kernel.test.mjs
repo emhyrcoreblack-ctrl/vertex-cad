@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createSketchModel, addLine, addConstraint, solveSketch } from "../src/kernel/sketch-kernel.js";
+import { createSketchModel, addLine, addCircle, addConstraint, solveSketch } from "../src/kernel/sketch-kernel.js";
 
 test("horizontal constraint aligns a line without changing its midpoint materially", () => {
   const model = createSketchModel();
@@ -84,4 +84,34 @@ test("equal constraint makes two line lengths match", () => {
   const result = solveSketch(model);
   assert.equal(result.converged, true);
   assert.ok(Math.abs(Math.hypot(a.x2-a.x1,a.y2-a.y1)-Math.hypot(b.x2-b.x1,b.y2-b.y1)) < 1e-5);
+});
+
+
+test("radius constraint drives a circle to its exact parametric radius", () => {
+  const model = createSketchModel();
+  const circle = addCircle(model, 4, -2, 3);
+  addConstraint(model, "radius", [circle.id], 12.5);
+  const result = solveSketch(model);
+  assert.equal(result.converged, true);
+  assert.ok(Math.abs(circle.r - 12.5) < 1e-6);
+});
+
+test("concentric constraint aligns two circle centres without forcing equal radii", () => {
+  const model = createSketchModel();
+  const a = addCircle(model, 0, 0, 4);
+  const b = addCircle(model, 8, -3, 9);
+  addConstraint(model, "concentric", [a.id, b.id]);
+  const result = solveSketch(model);
+  assert.equal(result.converged, true);
+  assert.ok(Math.hypot(a.cx - b.cx, a.cy - b.cy) < 1e-6);
+  assert.ok(Math.abs(a.r - 4) < 1e-9);
+  assert.ok(Math.abs(b.r - 9) < 1e-9);
+});
+
+test("radius constraint rejects zero and negative dimensions", async () => {
+  const { addCircle } = await import("../src/kernel/sketch-kernel.js");
+  const model = createSketchModel();
+  const circle = addCircle(model, 0, 0, 5);
+  assert.throws(() => addConstraint(model, "radius", [circle.id], 0), /positive/);
+  assert.throws(() => addConstraint(model, "radius", [circle.id], -2), /positive/);
 });
