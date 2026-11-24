@@ -12,6 +12,53 @@
 #app{height:100%;display:grid;grid-template-rows:48px 42px 1fr 25px}.top{display:flex;align-items:center;gap:16px;padding:0 14px;background:#151f29;border-bottom:1px solid var(--edge)}.brand{font-weight:900;letter-spacing:.18em;font-size:14px}.brand span{color:var(--accent)}.doc{color:var(--muted);border-left:1px solid var(--edge);padding-left:15px}.topright{margin-left:auto;display:flex;gap:7px}
 .toolbar{display:flex;align-items:center;gap:6px;padding:5px 10px;background:#17222d;border-bottom:1px solid var(--edge);overflow-x:auto}.group{display:flex;gap:4px;padding-right:8px;margin-right:3px;border-right:1px solid var(--edge);white-space:nowrap}.toolbar button{padding:6px 10px;white-space:nowrap}.workspace{min-height:0;display:grid;grid-template-columns:210px minmax(0,1fr) 235px}.panel{background:var(--panel);min-height:0;overflow:auto}.left{border-right:1px solid var(--edge)}.right{border-left:1px solid var(--edge)}.panelhead{padding:12px 13px 8px;color:#b8c8d5;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.treeitem{padding:8px 12px;display:flex;gap:8px;align-items:center;color:#c6d3de;cursor:pointer}.treeitem:hover{background:var(--panel2)}.treeitem.selected{background:#244354;color:white}.indent{padding-left:28px}.muted{color:var(--muted)}.viewport{position:relative;min-width:0;min-height:0;background:radial-gradient(ellipse at 50% 38%,#1b2b39,#101820 70%)}#view{width:100%;height:100%;display:block;touch-action:none}.overlay{position:absolute;pointer-events:none;color:#9fb3c3;background:#14212dcc;border:1px solid #34495b;border-radius:5px;padding:7px 10px;font-size:11px}.hint{top:12px;left:12px}.coords{bottom:12px;left:12px}.viewcube{right:12px;top:12px}.status{display:flex;align-items:center;padding:0 12px;background:#15202a;border-top:1px solid var(--edge);font-size:10px;color:var(--muted)}.status span:last-child{margin-left:auto}.section{padding:8px 12px;border-bottom:1px solid #2a3947}.section label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}.field{display:flex;gap:7px;align-items:center;margin:7px 0}.field input,.field select{width:100%;min-width:0;background:#101922;color:var(--txt);border:1px solid var(--edge);border-radius:5px;padding:7px}.field button{padding:6px}.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}.toolgrid button{font-size:11px;padding:8px 4px}.notice{font-size:11px;color:var(--muted);line-height:1.5}.pill{display:inline-block;color:#8ed6e8;border:1px solid #356176;border-radius:20px;padding:2px 7px;font-size:10px}
 @media(max-width:760px){.workspace{position:relative;display:block}.left{display:none}.viewport{position:absolute;inset:0}.right{display:block;position:absolute;z-index:3;left:0;right:0;bottom:0;height:148px;border:0;border-top:1px solid var(--edge);display:grid;grid-template-columns:125px minmax(0,1fr);overflow:auto}.right>.panelhead{display:none}.right .section{padding:7px 9px;border:0;border-right:1px solid var(--edge);min-width:125px}.right .section:nth-of-type(2){min-width:250px}.right .section:nth-of-type(3){display:block;min-width:260px}.right .toolgrid{grid-template-columns:repeat(4,minmax(60px,1fr));gap:4px}.right .toolgrid button{font-size:10px;padding:7px 3px}.right .notice{font-size:9px}.right #properties{display:none}.top{gap:9px;padding:0 9px}.doc{font-size:11px}.toolbar{padding:4px}.toolbar button{font-size:11px;padding:7px}.brand{font-size:12px}.topright button{padding:6px}.overlay{font-size:10px}.hint{max-width:55%;top:8px;left:8px}.coords{bottom:155px;left:8px}}
+
+/* Interface refresh: professional CAD workspace, light drafting canvas */
+:root{color-scheme:light;--bg:#edf0f3;--panel:#fff;--panel2:#f3f5f7;--edge:#cbd2d9;--txt:#202a34;--muted:#687784;--accent:#2879bd;--gold:#d18a20}
+html,body{background:#edf0f3;color:#202a34;font-family:Arial,Helvetica,sans-serif}
+#app{grid-template-rows:46px 40px 1fr 24px;background:#edf0f3}
+.top{background:#fff;border-bottom:1px solid #cbd2d9;color:#26323d;gap:12px;padding:0 16px}
+.brand{font-size:14px;letter-spacing:.08em;color:#26323d}
+.brand span{color:#2879bd}
+.doc{color:#364654;border-left:1px solid #d5dbe0}
+.topright button{background:#fff;color:#354452;border:1px solid #cbd2d9;border-radius:3px;padding:6px 10px}
+.topright button:hover{background:#eaf3fb;border-color:#2879bd}
+.toolbar{background:#f8f9fa;border-bottom:1px solid #cbd2d9;gap:5px;padding:4px 9px}
+.group{border-color:#d3d9df;gap:3px}
+.toolbar button{background:transparent;color:#344351;border:1px solid transparent;border-radius:3px;padding:6px 9px}
+.toolbar button:hover,.toolbar button.active{background:#e4f0fa;border-color:#9fc3e2;color:#155d98}
+.workspace{grid-template-columns:238px minmax(0,1fr) 286px;background:#e9edf0}
+.panel{background:#fff;color:#26323d}
+.left{border-right:1px solid #cbd2d9}
+.right{border-left:1px solid #cbd2d9}
+.panelhead{color:#52616e;background:#f7f8f9;border-bottom:1px solid #e0e4e8;font-size:10px;letter-spacing:.1em;padding:11px 12px}
+.treeitem{color:#344451;padding:7px 11px;border-radius:2px}
+.treeitem:hover{background:#edf4fa}
+.treeitem.selected{background:#dcecf9;color:#155d98}
+.section{border-bottom:1px solid #e2e6e9}
+.section label,.field label{color:#62717e}
+.field input,.field select,.section select{background:#fff!important;color:#26323d!important;border:1px solid #c7d0d8!important;border-radius:3px!important}
+.toolgrid button{background:#fff;color:#354452;border:1px solid #d2d9df;border-radius:3px}
+.toolgrid button:hover,.toolgrid button.active{background:#e6f1fa;border-color:#80b3dc;color:#155d98}
+.notice{color:#667684}
+.pill{color:#17699f;border-color:#a7c9e2;background:#edf6fc}
+.viewport{background:#e9edf0}
+.overlay{color:#4c5b67;background:#ffffffed;border:1px solid #cbd4dc;border-radius:3px}
+.status{background:#f8f9fa;border-top:1px solid #cbd2d9;color:#65727e}
+@media(max-width:760px){
+ #app{grid-template-rows:43px 42px 1fr 23px}
+ .workspace{grid-template-columns:1fr}
+ .right{background:#fff;box-shadow:0 -3px 12px #26374618;height:34vh;max-height:260px;min-height:150px;border-top:1px solid #cbd2d9}
+ .right .section{background:#fff}
+ .right .toolgrid button{min-width:0}
+ .top{padding:0 8px}
+ .doc{border:0;padding-left:0;max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .topright{gap:3px}
+ .topright button{font-size:11px;padding:5px 7px}
+ .toolbar{gap:3px}
+ .toolbar button{padding:6px 7px}
+}
+
 </style>
 </head>
 <body>
@@ -27,7 +74,7 @@
 <aside class="panel left"><div class="panelhead">Árbol del modelo</div><div class="treeitem selected">▣ <span>Documento</span></div><div class="treeitem indent">◇ <span>Plano superior (XY)</span></div><div id="tree"></div><div class="section"><div class="panelhead" style="padding:3px 0 8px">Historial</div><div class="treeitem">◷ <span>Origen</span></div></div></aside>
 <section class="viewport"><canvas id="view"></canvas><div class="overlay hint" id="hint">Selecciona Croquis para comenzar</div><div class="overlay viewcube">XYZ · Vista 3D</div><div class="overlay coords" id="coords">X 0.00 · Y 0.00 · Z 0.00</div></section>
 <aside class="panel right"><div class="panelhead">Herramientas de croquis</div><div class="section"><label>Plano de trabajo</label><select id="plane" style="width:100%;background:#101922;color:white;border:1px solid var(--edge);padding:8px;border-radius:5px"><option value="xy">Superior (XY)</option><option value="xz">Frontal (XZ)</option><option value="yz">Lateral (YZ)</option></select></div><div class="section"><label>Geometría</label><div class="toolgrid"><button data-tool="line">╱ Línea</button><button data-tool="rect">▭ Rectángulo</button><button data-tool="centerRect">⊞ Centro-rect.</button><button data-tool="circle">◯ Círculo</button><button data-tool="arc">⌒ Arco semicircular</button><button data-tool="poly">⬡ Polígono</button><button data-tool="point">• Punto</button></div><div class="notice" style="margin-top:8px">Ajuste a rejilla de 0.5 mm. Línea horizontal/vertical automática. Arco semicircular por centro y radio. Restricciones H/V y fijar disponibles en la barra superior; recortar pendiente.</div></div><div class="section"><label>Restricciones paramétricas</label><div class="field"><select id="conA" aria-label="Primera línea"><option value="">Línea A</option></select><select id="conB" aria-label="Segunda línea"><option value="">Línea B</option></select></div><div class="field"><select id="pointA" aria-label="Extremo de línea A"><option value="start">Inicio A</option><option value="end">Final A</option></select><select id="pointB" aria-label="Extremo de línea B"><option value="start">Inicio B</option><option value="end">Final B</option></select></div><div class="toolgrid"><button id="conCoincident">Coincidente</button><button id="conParallel">Paralelo</button><button id="conPerpendicular">Perpendicular</button><button id="conEqual">Igual longitud</button></div><div class="field"><input id="conDistanceValue" type="number" min="0" step="0.5" value="10" aria-label="Distancia en mm"><button id="conDistance">Aplicar distancia</button></div><div class="notice">Selecciona líneas en A y B. Coincidente une los extremos elegidos; distancia fija la longitud entre los extremos de A. Horizontal, vertical y fijar usan la línea seleccionada.</div></div><div class="panelhead">Propiedades</div><div class="section" id="properties"><div class="notice">Selecciona una entidad para ver sus propiedades.</div></div></aside>
-</main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 0.5</span></footer></div>
+</main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 0.6</span></footer></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -37,18 +84,18 @@ const $=s=>document.querySelector(s);
 const canvas=$('#view');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-const scene=new THREE.Scene(); scene.background=new THREE.Color(0x101820);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0xe9edf0);
 const camera=new THREE.PerspectiveCamera(45,1,.1,3000); camera.position.set(100,90,115);
 const controls=new OrbitControls(camera,canvas); controls.enableDamping=true; controls.target.set(0,0,0);
 scene.add(new THREE.HemisphereLight(0xd9efff,0x263544,2));
 const sun=new THREE.DirectionalLight(0xffffff,2.1); sun.position.set(80,100,60); scene.add(sun);
-const grid=new THREE.GridHelper(240,48,0x527184,0x293c4b); grid.position.y=-.04; scene.add(grid);
+const grid=new THREE.GridHelper(240,48,0x9aaab7,0xd5dce2); grid.position.y=-.04; scene.add(grid);
 scene.add(new THREE.AxesHelper(35));
 const origin=new THREE.Mesh(new THREE.SphereGeometry(.7,16,12),new THREE.MeshBasicMaterial({color:0xe5b85c})); scene.add(origin);
 const sketchGroup=new THREE.Group(),solidGroup=new THREE.Group(); scene.add(sketchGroup,solidGroup);
-const lineMat=new THREE.LineBasicMaterial({color:0x70c9e5});
-const selectedMat=new THREE.LineBasicMaterial({color:0xffc85b});
-const solidMat=new THREE.MeshStandardMaterial({color:0x69a9c4,metalness:.15,roughness:.38});
+const lineMat=new THREE.LineBasicMaterial({color:0x1679bd});
+const selectedMat=new THREE.LineBasicMaterial({color:0xe49a27});
+const solidMat=new THREE.MeshStandardMaterial({color:0x9bb8ca,metalness:.12,roughness:.42});
 let mode='select',tool='line',plane='xy',drawing=false,start=null,temp=null,selected=null;
 let sketch=createSketchModel('Croquis 1'),entities=[],features=[],history=[],redoStack=[],projectName='Proyecto sin título';
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -167,7 +214,7 @@ function extrude(){
 }
 function deleteSelected(){if(!selected)return;saveHistory();sketchGroup.remove(selected.object);entities=entities.filter(e=>e.id!==selected.id);sketch.entities=sketch.entities.filter(e=>e.id!==selected.id);sketch.constraints=sketch.constraints.filter(c=>!c.refs.some(r=>(typeof r==='string'?r:r.entityId)===selected.id));selected=null;refreshTree();select(null);$('#statusText').textContent='Entidad eliminada'}
 function saveProject(){
- const data={app:'VERTEX-CAD',version:'0.5.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
+ const data={app:'VERTEX-CAD',version:'0.6.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='vertex-cad-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#statusText').textContent='Proyecto exportado en JSON';
 }
 async function loadProject(file){
@@ -205,6 +252,6 @@ $('#fit').onclick=fit;$('#home').onclick=fit;
 function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(canvas);resize();
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 0.5';
+$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 0.6';
 </script>
 </body></html>
