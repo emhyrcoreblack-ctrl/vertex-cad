@@ -27,7 +27,7 @@
 <aside class="panel left"><div class="panelhead">Árbol del modelo</div><div class="treeitem selected">▣ <span>Documento</span></div><div class="treeitem indent">◇ <span>Plano superior (XY)</span></div><div id="tree"></div><div class="section"><div class="panelhead" style="padding:3px 0 8px">Historial</div><div class="treeitem">◷ <span>Origen</span></div></div></aside>
 <section class="viewport"><canvas id="view"></canvas><div class="overlay hint" id="hint">Selecciona Croquis para comenzar</div><div class="overlay viewcube">XYZ · Vista 3D</div><div class="overlay coords" id="coords">X 0.00 · Y 0.00 · Z 0.00</div></section>
 <aside class="panel right"><div class="panelhead">Herramientas de croquis</div><div class="section"><label>Plano de trabajo</label><select id="plane" style="width:100%;background:#101922;color:white;border:1px solid var(--edge);padding:8px;border-radius:5px"><option value="xy">Superior (XY)</option><option value="xz">Frontal (XZ)</option><option value="yz">Lateral (YZ)</option></select></div><div class="section"><label>Geometría</label><div class="toolgrid"><button data-tool="line">╱ Línea</button><button data-tool="rect">▭ Rectángulo</button><button data-tool="centerRect">⊞ Centro-rect.</button><button data-tool="circle">◯ Círculo</button><button data-tool="arc">⌒ Arco semicircular</button><button data-tool="poly">⬡ Polígono</button><button data-tool="point">• Punto</button></div><div class="notice" style="margin-top:8px">Ajuste a rejilla de 0.5 mm. Línea horizontal/vertical automática. Arco semicircular por centro y radio. Restricciones H/V y fijar disponibles en la barra superior; recortar pendiente.</div></div><div class="section"><label>Restricciones paramétricas</label><div class="field"><select id="conA" aria-label="Primera línea"><option value="">Línea A</option></select><select id="conB" aria-label="Segunda línea"><option value="">Línea B</option></select></div><div class="field"><select id="pointA" aria-label="Extremo de línea A"><option value="start">Inicio A</option><option value="end">Final A</option></select><select id="pointB" aria-label="Extremo de línea B"><option value="start">Inicio B</option><option value="end">Final B</option></select></div><div class="toolgrid"><button id="conCoincident">Coincidente</button><button id="conParallel">Paralelo</button><button id="conPerpendicular">Perpendicular</button><button id="conEqual">Igual longitud</button></div><div class="field"><input id="conDistanceValue" type="number" min="0" step="0.5" value="10" aria-label="Distancia en mm"><button id="conDistance">Aplicar distancia</button></div><div class="notice">Selecciona líneas en A y B. Coincidente une los extremos elegidos; distancia fija la longitud entre los extremos de A. Horizontal, vertical y fijar usan la línea seleccionada.</div></div><div class="panelhead">Propiedades</div><div class="section" id="properties"><div class="notice">Selecciona una entidad para ver sus propiedades.</div></div></aside>
-</main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 0.3</span></footer></div>
+</main><footer class="status"><span id="statusText">Listo</span><span>VÉRTEX CAD · Motor geométrico 0.5</span></footer></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -167,7 +167,7 @@ function extrude(){
 }
 function deleteSelected(){if(!selected)return;saveHistory();sketchGroup.remove(selected.object);entities=entities.filter(e=>e.id!==selected.id);sketch.entities=sketch.entities.filter(e=>e.id!==selected.id);sketch.constraints=sketch.constraints.filter(c=>!c.refs.some(r=>(typeof r==='string'?r:r.entityId)===selected.id));selected=null;refreshTree();select(null);$('#statusText').textContent='Entidad eliminada'}
 function saveProject(){
- const data={app:'VERTEX-CAD',version:'0.4.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
+ const data={app:'VERTEX-CAD',version:'0.5.0',units:'mm',projectName,sketch,entities:entities.map(({object,...e})=>e),features};
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='vertex-cad-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#statusText').textContent='Proyecto exportado en JSON';
 }
 async function loadProject(file){
@@ -205,6 +205,6 @@ $('#fit').onclick=fit;$('#home').onclick=fit;
 function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(canvas);resize();
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 0.4';
+$('#statusText').textContent='Motor 3D iniciado · unidades mm · VÉRTEX CAD 0.5';
 </script>
 </body></html>
