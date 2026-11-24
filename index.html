@@ -114,7 +114,8 @@ function pointsFor(t,a,b){
  const dx=b.x-a.x,dy=b.y-a.y;
  if(t==='line'){let x=dx,y=dy;if(Math.abs(dx)>=Math.abs(dy))y=0;else x=0;return [a,{x:a.x+x,y:a.y+y}]}
  if(t==='rect'||t==='centerRect'){let x1=a.x,y1=a.y,x2=b.x,y2=b.y;if(t==='centerRect'){x1=a.x-dx;y1=a.y-dy;x2=a.x+dx;y2=a.y+dy}return [{x:x1,y:y1},{x:x2,y:y1},{x:x2,y:y2},{x:x1,y:y2},{x:x1,y:y1}]}
- if(t==='circle'){const r=Math.hypot(dx,dy);return Array.from({length:97},(_,i)=>({x:a.x+Math.cos(i/96*Math.PI*2)*r,y:a.y+Math.sin(i/96*Math.PI*2)*r}))}\n if(t==='ellipse'){const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2,rx=Math.abs(dx)/2,ry=Math.abs(dy)/2;return Array.from({length:97},(_,i)=>({x:cx+Math.cos(i/96*Math.PI*2)*rx,y:cy+Math.sin(i/96*Math.PI*2)*ry}))}
+ if(t==='circle'){const r=Math.hypot(dx,dy);return Array.from({length:97},(_,i)=>({x:a.x+Math.cos(i/96*Math.PI*2)*r,y:a.y+Math.sin(i/96*Math.PI*2)*r}))}
+ if(t==='ellipse'){const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2,rx=Math.abs(dx)/2,ry=Math.abs(dy)/2;return Array.from({length:97},(_,i)=>({x:cx+Math.cos(i/96*Math.PI*2)*rx,y:cy+Math.sin(i/96*Math.PI*2)*ry}))}
  if(t==='poly'){const r=Math.hypot(dx,dy);return Array.from({length:7},(_,i)=>({x:a.x+Math.cos(i/6*Math.PI*2)*r,y:a.y+Math.sin(i/6*Math.PI*2)*r}))}
  if(t==='arc'){const r=Math.hypot(dx,dy);return Array.from({length:49},(_,i)=>({x:a.x+Math.cos(Math.PI*i/48)*r,y:a.y+Math.sin(Math.PI*i/48)*r}))}
  return [a,b];
